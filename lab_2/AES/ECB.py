@@ -2,12 +2,16 @@ import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 
-key = b'InformationSecurity M.Sc'
-message = b"""Applied Securityl"""
-iv = os.urandom(16)
+key1 = b'InformationSecurity M.Sc'
+key_128 = b'v9y$B&E)H@McQfTj'
+key_256 = b'H@McQfTjWnZr4t7w!z%C*F-JaNdRgUkX'
+
+key = key_128
+
+message = b"""Applied Security"""
 
 aesCipher = Cipher(algorithms.AES(key),
-                   modes.CBC(iv),
+                   modes.ECB(),
                    backend=default_backend())
 
 message += b"E" * (-len(message) % 16) # Padding to full blocks of 16 bytes
