@@ -57,23 +57,13 @@ private_key_bytes = private_key.private_bytes(
   encoding=serialization.Encoding.PEM,
   format=serialization.PrivateFormat.TraditionalOpenSSL,
   encryption_algorithm=serialization.NoEncryption())
-# Convert the private key bytes back to a key.
-# Because there is no encryption of the key, there is no password.
-private_key = serialization.load_pem_private_key(
-  private_key_bytes,
-  backend=default_backend(),
-  password=None)
 
 # Convert the public key into bytes.
 public_key_bytes = public_key.public_bytes(
   encoding=serialization.Encoding.PEM,
   format=serialization.PublicFormat.SubjectPublicKeyInfo
 )
-# Convert the private key bytes back to a key.
-# Because there is no encryption of the key, there is no password.
-public_key = serialization.load_pem_public_key(
-  public_key_bytes,
-  backend=default_backend())
+
 
 print("\n === key length ===\n", key_length)
 print("\n === public exponent ===\n", exponent)
