@@ -12,8 +12,9 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 
 
-# Methods for encryption/decryption
+# Setup public key logic
 
+## Methods for encryption/decryption
 def simple_rsa_encrypt(message, exponent, number):
     return gmpy2.powmod(message, exponent, number)
 
@@ -28,6 +29,17 @@ def int_to_bytes(i):
 def bytes_to_int(b):
     return int.from_bytes(b, byteorder='big')
 
+def generate_private_key(exponent, key_length):
+    private_key = rsa.generate_private_key(
+     public_exponent=exponent,
+     key_size=key_length,
+     backend=default_backend())
+    return private_key
+
+def generate_public_key(private_key):
+  public_key = private_key.public_key()
+  return public_key
+
 # We start by generatin the keys, the private key is kept secret
 # and the publi key is given to peers communicated with.
 
@@ -35,38 +47,33 @@ key_length = 4096
 exponent = 65537
 
 # Generate a private key.
-private_key = rsa.generate_private_key(
-     public_exponent=exponent,
-     key_size=key_length,
-     backend=default_backend()
-)
+private_key = generate_private_key(exponent, key_length);
 
 # Extract the public key from the private key.
 public_key = private_key.public_key()
 
 # Convert the private key into bytes. We won't encrypt it this time.
 private_key_bytes = private_key.private_bytes(
-    encoding=serialization.Encoding.PEM,
-    format=serialization.PrivateFormat.TraditionalOpenSSL,
-    encryption_algorithm=serialization.NoEncryption()
-)
-
-# Convert the public key into bytes.
-public_key_bytes = public_key.public_bytes(
-    encoding=serialization.Encoding.PEM,
-    format=serialization.PublicFormat.SubjectPublicKeyInfo
-)
-
+  encoding=serialization.Encoding.PEM,
+  format=serialization.PrivateFormat.TraditionalOpenSSL,
+  encryption_algorithm=serialization.NoEncryption())
 # Convert the private key bytes back to a key.
 # Because there is no encryption of the key, there is no password.
 private_key = serialization.load_pem_private_key(
-    private_key_bytes,
-    backend=default_backend(),
-    password=None)
+  private_key_bytes,
+  backend=default_backend(),
+  password=None)
 
+# Convert the public key into bytes.
+public_key_bytes = public_key.public_bytes(
+  encoding=serialization.Encoding.PEM,
+  format=serialization.PublicFormat.SubjectPublicKeyInfo
+)
+# Convert the private key bytes back to a key.
+# Because there is no encryption of the key, there is no password.
 public_key = serialization.load_pem_public_key(
-    public_key_bytes,
-    backend=default_backend())
+  public_key_bytes,
+  backend=default_backend())
 
 print("\n === key length ===\n", key_length)
 print("\n === public exponent ===\n", exponent)

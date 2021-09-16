@@ -15,7 +15,6 @@ def generate_a_salt():
     encoded_string = str_salt.encode()
     return bytearray(encoded_string) #The salt is returned as a byte_array
 
-
 message_to_hash=b'security'
 salt = generate_a_salt()
 
