@@ -71,12 +71,12 @@ new_connection = True
 line_is_secure = False
 authentic_public_key = False
 
-bytesAddressPair = UDPClientSocket.recvfrom(bufferSize)
+newPackage = UDPClientSocket.recvfrom(bufferSize)
 
-while online:
+while(online):
   # P2's initial response
   if(new_connection == True):
-    data = pickle.loads(bytesAddressPair[0])
+    data = pickle.loads(newPackage[0])
     p2_public_key_bytes = data[0]
     p2_cipher_text_of_hash = data[1]
     pk = "\nP1 key: \n{}".format(p2_public_key_bytes)
@@ -116,7 +116,8 @@ while online:
       user_input = input("\nEnter Secret Message: ").encode()
 
       iv = acs_tool.aes_get_iv()
-      cipher = acs_tool.aes_encrypt(user_input, symmetric_key, iv)
+      #cipher = acs_tool.aes_encrypt(user_input, symmetric_key, iv)
+      cipher = acs_tool.aes_encrypt(user_input, b'v9y$B&E)H@McQfTj', iv)
 
       package = ([cipher, iv])
       message = pickle.dumps(package)
@@ -126,8 +127,8 @@ while online:
 
   # only after establishing a secure line
   elif(line_is_secure == True and authentic_public_key == True):
-    bytesAddressPair = UDPClientSocket.recvfrom(bufferSize)  
-    data = pickle.loads(bytesAddressPair[0])
+    newPackage = UDPClientSocket.recvfrom(bufferSize)  
+    data = pickle.loads(newPackage[0])
 
     # extract iv and cipher text
     p2_cipher = data[0]
@@ -141,7 +142,8 @@ while online:
     user_input = input("\nEnter Secret Message: ").encode()
 
     iv = acs_tool.aes_get_iv()
-    cipher = acs_tool.aes_encrypt(user_input, symmetric_key, iv)
+    #cipher = acs_tool.aes_encrypt(user_input, symmetric_key, iv)
+    cipher = acs_tool.aes_encrypt(user_input, b'v9y$B&E)H@McQfTj', iv)
 
     package = ([cipher, iv])
     message = pickle.dumps(package)

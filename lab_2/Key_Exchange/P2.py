@@ -40,40 +40,38 @@ authentic_public_key = False
 
 # Wait for incomming calls, any one out there? Hopefully P1.
 while(online):
-    bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-    address = bytesAddressPair[1]
-    sendersIP  = "P1's Address is:{}".format(address)
-    print(sendersIP)
+    newPackage = UDPServerSocket.recvfrom(bufferSize)
+    address = newPackage[1]
+    print("\nP1's Address is:{}".format(address))
 
-    data = pickle.loads(bytesAddressPair[0])
+    print("\nline secure: {}".format(line_is_secure))
+    print("\nauthentic p1 key: {}".format(authentic_public_key))
 
+    data = pickle.loads(newPackage[0])
+
+    # if connection is new, verify public key first
     if(new_connection == True):
       p1_public_key_bytes = data[0]
       p1_cipher_text = data[1]
-      pk = "\nP1 key: \n{}".format(p1_public_key_bytes)
-      ct = "\nP1 cipher: \n{}".format(p1_cipher_text)
-      print(pk)
-      print(ct)
+      print("\nP1 key: \n{}".format(p1_public_key_bytes))
+      print("\nP1 cipher: \n{}".format(p1_cipher_text))
 
       p1_public_key = acs_tool.puk_bytes_to_puk(p1_public_key_bytes)
       p1_public_key_exponent = p1_public_key.public_numbers().e
       p1_public_key_number = p1_public_key.public_numbers().n
 
       plaint_text_as_int = acs_tool.rsa_decrypt(p1_cipher_text, p1_public_key_exponent, p1_public_key_number)
-      pt = "\nP1 plain text: \n{}".format(plaint_text_as_int)
-      print(pt)
+      print("\nP1 plain text: \n{}".format(plaint_text_as_int))
 
       p1_public_key_hash = acs_tool.hash_message(p1_public_key_bytes)
       p1_public_key_hash_as_int = acs_tool.bytes_to_int(p1_public_key_hash.digest())
-      hash = "\nP1 pu1 hash: \n{}".format(p1_public_key_hash_as_int)
-      print(hash)
+      print("\nP1 pu1 hash: \n{}".format(p1_public_key_hash_as_int))
 
       p1_public_key_hash = acs_tool.int_to_bytes(p1_public_key_hash_as_int)
       plain_text = acs_tool.int_to_bytes(plaint_text_as_int)
 
       authentic_public_key = True if p1_public_key_hash == plain_text else False
-      auth_msg = "\nIs P1 public key valid: {}".format(authentic_public_key)
-      print(auth_msg)
+      print("\nIs P1 public key valid: {}".format(authentic_public_key))
 
       # only enter this code block if P1 public key matches attached hash
       if(authentic_public_key == True):
@@ -135,11 +133,8 @@ while(online):
         line_is_secure = True
 
 
-    # only after establishing a secure line
-    elif(line_is_secure == True and authentic_public_key == True):
-      bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)  
-      data = pickle.loads(bytesAddressPair[0])
-
+    # if connection is not new AND  p1's public key is authentic AND the line is secure, send encrypted messages
+    elif(authentic_public_key == True and line_is_secure == True):
       # extract iv and cipher text
       p1_cipher = data[0]
       p1_iv = data[1]

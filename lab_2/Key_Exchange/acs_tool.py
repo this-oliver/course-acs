@@ -64,16 +64,22 @@ def aes_get_iv():
   return os.urandom(16)
 
 def aes_encrypt(message, key, iv):
+  print("\n encrypt message: {}".format(message))
+  print("\n encrypt key: {}".format(key))
+  print("\n encrypt iv: {}".format(iv))
   aesCipher = Cipher(algorithms.AES(key),
-                   modes.CBC(iv),
+                   modes.CTR(iv),
                    backend=default_backend())
   aesEncryptor = aesCipher.encryptor()
-  message += b"E" * (-len(message) % 16) # Padding to full blocks of 16 bytes
   return aesEncryptor.update(message)
 
 def aes_decrypt(message, key, iv):
+  print("\n message: {}".format(message))
+  print("\n key: {}".format(key))
+  print("\n iv: {}".format(iv))
+
   aesCipher = Cipher(algorithms.AES(key),
-                   modes.CBC(iv),
+                   modes.CTR(iv),
                    backend=default_backend())
   aesDecryptor = aesCipher.decryptor()
   return aesDecryptor.update(message)
