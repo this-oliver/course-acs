@@ -136,7 +136,7 @@ while(online):
     p2_iv = data[1]
 
     # decrypt cipher
-    plain_text = acs_tool.aes_decrypt(p2_cipher, symmetric_key, p2_iv)
+    plain_text = acs_tool.aes_decrypt(p2_cipher, b'v9y$B&E)H@McQfTj', p2_iv)
     secret = plain_text
     print("\nP2 says: \n{}".format(secret))
 
@@ -158,3 +158,5 @@ while(online):
     print("\nLine is no longer secure\n")
   
   print("\nwaiting...\n")
+
+  #This is a comment
