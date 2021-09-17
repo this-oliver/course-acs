@@ -67,6 +67,7 @@ UDPClientSocket.sendto(data, serverAddressPort)
 
 online = True
 symmetric_key = None
+symmetric_key_iv = None
 new_connection = True
 line_is_secure = False
 authentic_public_key = False
