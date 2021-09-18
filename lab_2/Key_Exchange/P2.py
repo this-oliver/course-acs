@@ -21,63 +21,56 @@ bufferSize = 1024
 UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 UDPServerSocket.bind((myIP, myPort))
 
-
-""" Step 2.1
-1. [P2] decrypt cipher text (c1) with P1's pu1 => pt1 (this is essentially h1)
-2. [P2] create a hash of pu1 => h2
-3. [P2] verifies that pt1 is equal to h2
-"""
-
 print("\nP2 is up running and ready to go!")
-msgFromServer = "\nHi P1, Applied Computer Science P2 here, I hope all is secured on your side."
-bytesToSend = str.encode(msgFromServer)
 
 online = True
-symmetric_key = None
 new_connection = True
 line_is_secure = False
 authentic_public_key = False
 
-# Wait for incomming calls, any one out there? Hopefully P1.
+symmetric_key_bytes = None
+symmetric_key_iv_bytes = None
+
+# Wait for incomming messages
 while(online):
     newPackage = UDPServerSocket.recvfrom(bufferSize)
     address = newPackage[1]
     print("\nP1's Address is:{}".format(address))
 
-    print("\nline secure: {}".format(line_is_secure))
-    print("\nauthentic p1 key: {}".format(authentic_public_key))
-
     data = pickle.loads(newPackage[0])
 
-    # if connection is new, verify public key first
+    print("\nLine Secure: {}".format(line_is_secure))
+    print("\nAuthentic P1 Key: {}".format(authentic_public_key))
+
+    # if connection is new, verify public key
     if(new_connection == True):
+      """ Step 2.1 Verify P1's public key
+      1. [P2] decrypt cipher text (c1) with P1's pu1 => pt1 (this is essentially h1)
+      2. [P2] create a hash of pu1 => h2
+      3. [P2] verifies that pt1 is equal to h2
+      """
+      
+      print("\n [1] Veryifying public key...")
+
       p1_public_key_bytes = data[0]
       p1_cipher_text = data[1]
-      print("\nP1 key: \n{}".format(p1_public_key_bytes))
-      print("\nP1 cipher: \n{}".format(p1_cipher_text))
 
       p1_public_key = acs_tool.puk_bytes_to_puk(p1_public_key_bytes)
-      p1_public_key_exponent = p1_public_key.public_numbers().e
-      p1_public_key_number = p1_public_key.public_numbers().n
 
-      plaint_text_as_int = acs_tool.rsa_decrypt(p1_cipher_text, p1_public_key_exponent, p1_public_key_number)
-      print("\nP1 plain text: \n{}".format(plaint_text_as_int))
+      plaint_text_as_int = acs_tool.rsa_decrypt(p1_cipher_text, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
+      plain_text_bytes = acs_tool.int_to_bytes(plaint_text_as_int)
 
       p1_public_key_hash = acs_tool.hash_message(p1_public_key_bytes)
-      p1_public_key_hash_as_int = acs_tool.bytes_to_int(p1_public_key_hash.digest())
-      print("\nP1 pu1 hash: \n{}".format(p1_public_key_hash_as_int))
+      p1_public_key_hash_bytes = p1_public_key_hash.digest()
 
-      p1_public_key_hash = acs_tool.int_to_bytes(p1_public_key_hash_as_int)
-      plain_text = acs_tool.int_to_bytes(plaint_text_as_int)
-
-      authentic_public_key = True if p1_public_key_hash == plain_text else False
+      authentic_public_key = True if p1_public_key_hash_bytes == plain_text_bytes else False
       print("\nIs P1 public key valid: {}".format(authentic_public_key))
 
       # only enter this code block if P1 public key matches attached hash
       if(authentic_public_key == True):
         new_connection = False
-
-        """ Step 2.2
+        
+        """ Step 2.2 Create P2 private and public key AND create symetric key
         1. [P2] create private key and public key => pr2 & pu2
         2. [P2] create hash on pu2 => h3
         3. [p2] create a symetric key => sk1
@@ -85,53 +78,55 @@ while(online):
         5. [p2] send pu2 and c3 to P1
         """
 
+        print("\n Creating private and public keys..\n")
+        
         rsa_key_length = 512
         rsa_exponent = 65537
+        print("\n P2 key length is", rsa_key_length, " and the public exponent is ", rsa_exponent, "\n")
 
-        print("\n === P2 key length ===\n", rsa_key_length)
-        print("\n === P2 public exponent ===\n", rsa_exponent)
-
-        # Generate a private key.
+        # Generate a private key
         private_key = acs_tool.generate_private_key(rsa_exponent, rsa_key_length)
-        private_key_exponent = private_key.private_numbers().d
-        private_key_number = private_key.private_numbers().public_numbers.n
 
         # Extract the public key from the private key.
         public_key = private_key.public_key()
-        public_key_exponent = public_key.public_numbers().e
-        public_key_number = public_key.public_numbers().n
 
         # Convert the keys into bytes
         private_key_bytes = acs_tool.prk_to_bytes(private_key)
         public_key_bytes = acs_tool.puk_to_bytes(public_key)
-
-        print("\n === P2 private key ===\n\n", private_key_bytes)
-        print("\n === P2 public key ===\n\n", public_key_bytes)
+        print("\n ======> P2 private key\n\n", private_key_bytes)
+        print("\n ======> P2 public key\n\n", public_key_bytes)
 
         ## Prepare package
-
         hash_public_key = acs_tool.hash_message(public_key_bytes)
-        hash_as_int = acs_tool.bytes_to_int(hash_public_key.digest())
+        hash_public_key_as_int = acs_tool.bytes_to_int(hash_public_key.digest())
+        print("\n ======> P2 public key hash\n\n", hash_public_key_as_int)
 
-        print("\n === P2 public key hash ===\n\n", hash_as_int)
-
-        hash_cipher_text = acs_tool.rsa_encrypt(hash_as_int, private_key_exponent, private_key_number)
-        print("\n === P2 hash cipher ===\n\n", hash_cipher_text)
+        cipher_public_key_hash_int = acs_tool.rsa_encrypt(hash_public_key_as_int, private_key.private_numbers().d, private_key.private_numbers().public_numbers.n)
+        print("\n ======> P2 hash cipher\n\n", cipher_public_key_hash_int)
         
-        symmetric_key = acs_tool.aes_get_key_128()
-        symmetric_key_as_int = acs_tool.bytes_to_int(symmetric_key)
-        symmetric_key_cipher_text = acs_tool.rsa_encrypt(symmetric_key_as_int, private_key_exponent, private_key_number)
-        print("\n === P2 sk cipher ===\n\n", symmetric_key_cipher_text)
+        symmetric_key_bytes = acs_tool.aes_get_key_128()
+        symmetric_key_as_int = acs_tool.bytes_to_int(symmetric_key_bytes)
+        cipher_symmetric_key_int = acs_tool.rsa_encrypt(symmetric_key_as_int, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
+        print("\n ======> P2 sk cipher\n\n", cipher_symmetric_key_int)
 
-        package = ([public_key_bytes, hash_cipher_text, symmetric_key_cipher_text])
+        symmetric_key_iv_bytes = acs_tool.aes_get_iv()
+        symmetric_key_iv_as_int = acs_tool.bytes_to_int(symmetric_key_iv_bytes)
+        cipher_symmetric_key_iv_int = acs_tool.rsa_encrypt(symmetric_key_iv_as_int, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
+        print("\n ======> P2 sk iv cipher\n\n", cipher_symmetric_key_int)
+
+        package = ([public_key_bytes, cipher_public_key_hash_int, cipher_symmetric_key_int, cipher_symmetric_key_iv_int])
         data = pickle.dumps(package)
 
         #Send response to P1
         UDPServerSocket.sendto(data, address)
-        print("\n === P2 message sent ===\n\n", data)
-
+        print("\n ======> P2 message sent\n\n", package)
         line_is_secure = True
 
+      else:
+        online = False
+        print("\nNot Secure: Public key does not match attached hash\n")
+        print("\nP1 plain text: \n{}".format(plain_text_bytes))
+        print("\nP1 pu1 hash: \n{}".format(p1_public_key_hash_bytes))
 
     # if connection is not new AND  p1's public key is authentic AND the line is secure, send encrypted messages
     elif(authentic_public_key == True and line_is_secure == True):
@@ -140,20 +135,17 @@ while(online):
       p1_iv = data[1]
 
       # decrypt cipher
-      plain_text = acs_tool.aes_decrypt(p1_cipher, symmetric_key, p1_iv)
-      secret = plain_text
-      print("\nP1 says: \n{}".format(secret))
+      plain_text_bytes = acs_tool.aes_decrypt(p1_cipher, symmetric_key_bytes, symmetric_key_iv_bytes)
+      print("\nP1 says: \n{}".format(plain_text_bytes))
 
-      user_input = input("\nEnter Secret Message: ").encode()
+      secret_message_bytes = input("\nEnter secret message: ").encode()
+      cipher = acs_tool.aes_encrypt(secret_message_bytes, symmetric_key_bytes, symmetric_key_iv_bytes)
 
-      iv = acs_tool.aes_get_iv()
-      cipher = acs_tool.aes_encrypt(user_input, symmetric_key, iv)
-
-      package = ([cipher, iv])
+      package = ([cipher])
       message = pickle.dumps(package)
 
       UDPServerSocket.sendto(message, address)
-      print("\n === P2 message sent ===\n\n", message)
+      print("\n ======> P2 message sent\n\n", message)
     
     # something went wrong
     else:

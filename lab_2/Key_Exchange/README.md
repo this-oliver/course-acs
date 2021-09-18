@@ -33,3 +33,8 @@
 2. [P1] sends message to P2
 3. [P2] decrypts message with sk1 => pt3
    ...
+
+
+python3 lab_2/Key_Exchange/P1.py
+
+python3 lab_2/Key_Exchange/P2.py
