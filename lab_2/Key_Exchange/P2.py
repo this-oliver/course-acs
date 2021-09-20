@@ -31,7 +31,7 @@ authentic_public_key = False
 symmetric_key_bytes = None
 symmetric_key_iv_bytes = None
 
-# Wait for incomming messages
+# Wait for incomming messages from p1
 while(online):
     newPackage = UDPServerSocket.recvfrom(bufferSize)
     address = newPackage[1]
@@ -43,7 +43,7 @@ while(online):
     print("\nLine Secure: {}".format(line_is_secure))
     print("\nAuthentic P1 Key: {}".format(authentic_public_key))
 
-    # if connection is new, verify public key
+    # If the connection is new, verify the public key
     if(new_connection == True):
         """ Step 2.1 Verify P1's public key
         1. [P2] decrypt cipher text (c1) with P1's pu1 => pt1 (this is essentially h1)
@@ -90,7 +90,7 @@ while(online):
             print("\n======> (P2 private key)\n\n", private_key_bytes)
             print("\n======> (P2 public key)\n\n", public_key_bytes)
 
-            # Prepare package
+            # Prepare package to send to p1 (key, cipher key, symmetric key iv)
             hash_public_key_bytes = acs_tool.hash_message(public_key_bytes)
             hash_public_key_as_int = acs_tool.bytes_to_int(hash_public_key_bytes)
             print("\n======> Hash of public key created")
@@ -118,6 +118,7 @@ while(online):
             line_is_secure = True
 
         else:
+            #Let user know if the connection is authentic/if the public key match the attached key hash
             online = False
             print("\n###################################################################")
             print("Not Secure: Public key does not match attached hash\n")
@@ -144,7 +145,7 @@ while(online):
         UDPServerSocket.sendto(message, address)
         print("\nsent package. waiting for reply...")
 
-    # something went wrong
+    # Conditions not met, end while loop
     else:
         online = False
         print("\n###################################################################")

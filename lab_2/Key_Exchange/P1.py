@@ -24,7 +24,7 @@ UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 4. send the pu1 and c1 to P2
 
 """
-
+#RSA algorithm variables
 rsa_key_length = 512
 rsa_exponent = 65537
 print("\n======> Creating private and public keys with the key length", rsa_key_length, " and the public exponent ", rsa_exponent)
@@ -39,7 +39,7 @@ public_key_bytes = acs_tool.puk_to_bytes(public_key)
 print("\n======> (P1 private key)\n\n", private_key_bytes)
 print("\n======> (P1 public key)\n\n", public_key_bytes)
 
-# Prepare package
+# Prepare package to p2 (public key, cipher text)
 hash_public_key_bytes = acs_tool.hash_message(public_key_bytes)
 hash_public_key_int = acs_tool.bytes_to_int(hash_public_key_bytes)
 print("\n======> Hash of public key created")
@@ -64,8 +64,8 @@ newPackage = UDPClientSocket.recvfrom(bufferSize)
 print("\npackage received")
 
 # Wait for P2's response
+#Block running if the connection is not set to False
 while(online):
-
     if(new_connection == True):
         data = pickle.loads(newPackage[0])
 
@@ -102,7 +102,7 @@ while(online):
             2. [P1] sends message to P2
             3. [P2] decrypts message with sk1 => pt3
             """
-
+            #Convert to fit package
             symmetric_key_as_int = acs_tool.rsa_decrypt(cipher_symmetric_key_int, private_key.private_numbers().d, private_key.private_numbers().public_numbers.n)
             symmetric_key_bytes = acs_tool.int_to_bytes(symmetric_key_as_int)
             print("\n======> Symetric key extracted")
@@ -119,7 +119,7 @@ while(online):
 
             package = ([cipher])
             message = pickle.dumps(package)
-
+            #Send package message
             UDPClientSocket.sendto(message, serverAddressPort)
             print("\n###################################################################")
             print("package sent: \n{}".format(message))
@@ -127,6 +127,7 @@ while(online):
             print("\nwaiting for reply...")
 
         else:
+            #If it is not an authentic key, set online to false
             online = False
             print("\n###################################################################")
             print("Not Secure: Public key does not match attached hash\n")
