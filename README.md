@@ -16,7 +16,7 @@ In this lab, we experiemented with different encryption and hash python librarie
 
 ### **Hashing**
 
-In [Hash.py](./lab_2/HASH.py), we looked multiple hash alsorigthms and played around with different plain texts. We even tried out salting the hashes.
+In [Hash.py](./lab_2/Hash.py), we looked multiple hash alsorigthms and played around with different plain texts. We even tried out salting the hashes.
 
 ### **Symmetric Encryption**
 
