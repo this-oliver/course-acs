@@ -12,7 +12,7 @@ Created on Mon Sep 13 12:45:02 2021
 
 import socket
 import pickle
-import acs_tool
+import helper
 
 # Create a datagram socket and bind to an IP address and port
 myIP = "127.0.0.1"
@@ -54,11 +54,11 @@ while(online):
         p1_public_key_bytes = data[0]
         p1_cipher_text = data[1]
         
-        p1_public_key = acs_tool.puk_bytes_to_puk(p1_public_key_bytes)
-        p1_public_key_hash_bytes = acs_tool.hash_message(p1_public_key_bytes)
+        p1_public_key = helper.puk_bytes_to_puk(p1_public_key_bytes)
+        p1_public_key_hash_bytes = helper.hash_message(p1_public_key_bytes)
 
-        plaint_text_as_int = acs_tool.rsa_decrypt(p1_cipher_text, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
-        plain_text_bytes = acs_tool.int_to_bytes(plaint_text_as_int)
+        plaint_text_as_int = helper.rsa_decrypt(p1_cipher_text, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
+        plain_text_bytes = helper.int_to_bytes(plaint_text_as_int)
 
         authentic_public_key = True if p1_public_key_hash_bytes == plain_text_bytes else False
         print("\n======> P1 public key verified: {}".format(authentic_public_key))
@@ -79,34 +79,34 @@ while(online):
             print("\n======> Creating private and public keys with the key length", rsa_key_length, " and the public exponent ", rsa_exponent)
             
             # Generate a private key
-            private_key = acs_tool.generate_private_key(rsa_exponent, rsa_key_length)
+            private_key = helper.generate_private_key(rsa_exponent, rsa_key_length)
 
             # Extract the public key from the private key.
             public_key = private_key.public_key()
 
             # Convert the keys into bytes
-            private_key_bytes = acs_tool.prk_to_bytes(private_key)
-            public_key_bytes = acs_tool.puk_to_bytes(public_key)
+            private_key_bytes = helper.prk_to_bytes(private_key)
+            public_key_bytes = helper.puk_to_bytes(public_key)
             print("\n======> (P2 private key)\n\n", private_key_bytes)
             print("\n======> (P2 public key)\n\n", public_key_bytes)
 
             # Prepare package to send to p1 (key, cipher key, symmetric key iv)
-            hash_public_key_bytes = acs_tool.hash_message(public_key_bytes)
-            hash_public_key_as_int = acs_tool.bytes_to_int(hash_public_key_bytes)
+            hash_public_key_bytes = helper.hash_message(public_key_bytes)
+            hash_public_key_as_int = helper.bytes_to_int(hash_public_key_bytes)
             print("\n======> Hash of public key created")
 
-            symmetric_key_bytes = acs_tool.aes_get_key_128()
-            symmetric_key_as_int = acs_tool.bytes_to_int(symmetric_key_bytes)
+            symmetric_key_bytes = helper.aes_get_key_128()
+            symmetric_key_as_int = helper.bytes_to_int(symmetric_key_bytes)
             
-            symmetric_key_iv_bytes = acs_tool.aes_get_iv()
-            symmetric_key_iv_as_int = acs_tool.bytes_to_int(symmetric_key_iv_bytes)
+            symmetric_key_iv_bytes = helper.aes_get_iv()
+            symmetric_key_iv_as_int = helper.bytes_to_int(symmetric_key_iv_bytes)
             print("\n======> Symmetric key and iv created")
             
-            cipher_public_key_hash_int = acs_tool.rsa_encrypt(hash_public_key_as_int, private_key.private_numbers().d, private_key.private_numbers().public_numbers.n)
+            cipher_public_key_hash_int = helper.rsa_encrypt(hash_public_key_as_int, private_key.private_numbers().d, private_key.private_numbers().public_numbers.n)
             print("\n======> Public key hash encrypted using private key and rsa algorithm")
-            cipher_symmetric_key_int = acs_tool.rsa_encrypt(symmetric_key_as_int, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
+            cipher_symmetric_key_int = helper.rsa_encrypt(symmetric_key_as_int, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
             print("\n======> symmetric key encrypted using P1 public key and rsa algorithm")
-            cipher_symmetric_key_iv_int = acs_tool.rsa_encrypt(symmetric_key_iv_as_int, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
+            cipher_symmetric_key_iv_int = helper.rsa_encrypt(symmetric_key_iv_as_int, p1_public_key.public_numbers().e, p1_public_key.public_numbers().n)
             print("\n======> symmetric key iv encrypted using P1 public key and rsa algorithm")
 
             # Send response to P1
@@ -132,12 +132,12 @@ while(online):
         p1_cipher_bytes = data[0]
 
         # decrypt cipher
-        plain_text_bytes = acs_tool.aes_decrypt( p1_cipher_bytes, symmetric_key_bytes, symmetric_key_iv_bytes)
+        plain_text_bytes = helper.aes_decrypt( p1_cipher_bytes, symmetric_key_bytes, symmetric_key_iv_bytes)
         print("\n===================(Message Received)===================")
         print("\n ---- P1 says: {}".format(plain_text_bytes))
 
         secret_message_bytes = input("\n ---- Enter Secret Message: ").encode()
-        cipher = acs_tool.aes_encrypt( secret_message_bytes, symmetric_key_bytes, symmetric_key_iv_bytes)
+        cipher = helper.aes_encrypt( secret_message_bytes, symmetric_key_bytes, symmetric_key_iv_bytes)
 
         package = ([cipher])
         message = pickle.dumps(package)
