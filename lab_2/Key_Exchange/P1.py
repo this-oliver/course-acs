@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Sep 13 12:47:58 2021
+Created on 16 Sep 2021 14:51:00
 
-@author: christer
+@author: olivermanzi
+
+This code implements a client that 
+establishes a connection with a server 
+and creates an assymetric key that is 
+used to exchange a symmetric key that 
+encrypts messages with the server
 """
 
 import socket

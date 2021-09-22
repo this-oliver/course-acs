@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Sep  7 17:44:43 2021
+Created on 16 Sep 2021 14:51:00
 
-@author: christer
+@author: olivermanzi
+
+This code encrypts plain text with 
+the private key and decrypts the 
+cipher text with the public key
 """
 
 import gmpy2

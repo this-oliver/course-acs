@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Sep 13 12:45:02 2021
+Created on 16 Sep 2021 14:51:00
 
-@author: christer
+@author: olivermanzi
+
+This code implements a server that 
+establishes a connection with a client 
+and creates an assymetric key that is 
+used to exchange a symmetric key that 
+encrypts messages with a client
 """
-# P2 acts as a server due to the while loop, listening to a dedicated port.
-# In this lab, P2 will both initiate sending messages and respond to messages
-# so you need to implement that. For how to initiate a communication, see P1.py.
-# Good luck!
 
 import socket
 import pickle

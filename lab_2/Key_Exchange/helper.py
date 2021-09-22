@@ -1,3 +1,9 @@
+"""
+Created on 16 Sep 2021 14:51:00
+
+@author: olivermanzi
+"""
+
 import os
 import gmpy2
 import hashlib
