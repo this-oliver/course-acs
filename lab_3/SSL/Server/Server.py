@@ -12,13 +12,18 @@ import ssl
 
 listen_addr = '127.0.0.1'
 listen_port = 8101
-server_cert = 'put the name of the servers certificate file here'
-client_certs = 'put the name of the client certificate file here'
-server_key = 'put the name of servers private key here'
+
+# configure server variables below
+server_key = './private_key.pem'
+server_cert = './certificate.crt'
+client_certs = './../Client/certificate.crt'
 
 context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+# make certificates mandatory
 context.verify_mode = ssl.CERT_REQUIRED
+# setting up the server certificate and private key
 context.load_cert_chain(certfile=server_cert, keyfile=server_key)
+# setup list of certificates that should be verified (and allowed?)
 context.load_verify_locations(cafile=client_certs)
 
 bindsocket = socket.socket()
@@ -32,7 +37,7 @@ print("Client connected: {}:{}".format(fromaddr[0], fromaddr[1]))
 conn = context.wrap_socket(newsocket, server_side=True)
 print("SSL established. Peer: {}\n".format(conn.getpeercert()))
 
-#WAit for a message from the client
+#Wait for a message from the client
 data = conn.recv(4096)
 print (data)
 print("\nClosing connection")
