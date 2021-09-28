@@ -14,7 +14,7 @@ server_port = 8101
 server_sni_hostname = "ltu.se"
 
 client_key = "./key.pem"
-client_cert = "./cert.crt"
+client_cert = "./cert.pem"
 server_cert = "./../Server/cert.crt"
 
 context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=server_cert)
