@@ -57,14 +57,15 @@ def menu():
     if alt == "A" or alt == "a":
         registerMFA()
     elif alt == "B" or alt == "b":
-        if login() == False:
-            print("\nNo such user or the password is incorrect!")
-        elif multiFactorAuthEnabled == True:
+        # check if multifactor is enabled
+        if multiFactorAuthEnabled == True:
             multiFactorAuth = input("Enter code: ")
             if multiFactorAuth == t.now():
                 print("\nThe login was successfull!")
             else:
                 print("\nWrong authentication code entered!")
+        elif login() == False:
+            print("\nNo such user or the password is incorrect!")
         else:
             print("\nThe login was successfull!")
     elif alt == "Q" or alt == "q":
