@@ -17,6 +17,7 @@ listen_port = 8101
 server_key = "key.pem"
 server_cert = "cert.crt"
 client_cert = "../Client/cert.crt"
+client2_cert = "../Client2/cert.crt"
 
 context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 # make certificates mandatory
@@ -25,6 +26,7 @@ context.verify_mode = ssl.CERT_REQUIRED
 context.load_cert_chain(certfile=server_cert, keyfile=server_key)
 # setup list of certificates that should be verified (and allowed?)
 context.load_verify_locations(cafile=client_cert)
+context.load_verify_locations(cafile=client2_cert)
 
 bindsocket = socket.socket()
 bindsocket.bind((listen_addr, listen_port))

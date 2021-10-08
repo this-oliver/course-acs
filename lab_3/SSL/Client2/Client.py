@@ -11,11 +11,11 @@ import ssl
 
 server_addr = "127.0.0.1"  # Local host
 server_port = 8101
-server_sni_hostname = "ltu.se"
+server_sni_hostname = "Server_LTU"
 
-client_key = "./key.pem"
-client_cert = "./cert.pem"
-server_cert = "./../Server/cert.crt"
+client_key = "key.pem"
+client_cert = "cert.crt"
+server_cert = "../Server/cert.crt"
 
 context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=server_cert)
 context.load_cert_chain(certfile=client_cert, keyfile=client_key)
